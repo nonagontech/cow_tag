@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "444101146525",
+    "project_id": "seismiappmobilephone",
+    "storage_bucket": "seismiappmobilephone.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444101146525:android:a95c53b042d62f26192174",
+        "android_client_info": {
+          "package_name": "com.homedots"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXN-1uHjSQjqn6AwFQ4Fed-xiAbdjZ1d0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
