@@ -47,13 +47,22 @@ lib/
    flutter pub get
    ```
 
-3. 运行项目
+3. （可选）配置 iOS 平台
+
+   如需在 iOS 设备
+
+   ```
+   cd ios
+   pod install
+   ```
+
+4. 运行项目
 
    ```
    flutter run
    ```
 
-4. 连接耳标设备后开始测量。
+5. 连接耳标设备后开始测量。
 
 ------
 
