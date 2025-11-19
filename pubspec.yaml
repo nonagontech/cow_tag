@@ -61,8 +61,7 @@ dependencies:
   url_launcher: ^6.2.5
   # bruno: ^3.3.2
   bruno:
-    git:
-      url: https://github.com/nonagontech/bruno
+    path: ../bruno
   flutter_keyboard_visibility: ^6.0.0
   image_picker: ^1.0.7
   permission_handler: ^11.3.1
@@ -80,7 +79,7 @@ dependencies:
   flutter_blue_plus: ^1.31.17
   device_info_plus: ^10.0.1
   responsive_framework: ^1.4.0
-  syncfusion_flutter_datepicker: ^25.1.35
+  syncfusion_flutter_datepicker: ^31.2.12
   data_table_2: ^2.5.12
   graphic: ^2.2.0
   number_paginator: ^0.4.1
