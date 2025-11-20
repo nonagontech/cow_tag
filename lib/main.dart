@@ -58,7 +58,7 @@ class MyApp extends StatelessWidget {
           title: 'Seismi Vet', //软件后台清理时的名称
           translations: TranslationServer(), //多语言字典
           locale: TranslationServer().getLocal(), //当前使用的语言
-          fallbackLocale: const Locale("zh", "Hans"), //在选择无效区域设置的情况下指定回退区域设置。
+          fallbackLocale: const Locale("en", "US"), //在选择无效区域设置的情况下指定回退区域设置。
           supportedLocales: const [
             Locale('zh', 'CN'), // 支持的语言和地区
             Locale('en', 'US'),
