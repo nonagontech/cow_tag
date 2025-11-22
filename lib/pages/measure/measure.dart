@@ -125,17 +125,21 @@ class _MeasureCowState extends State<MeasureCow> {
     //蓝牙初始化
     ble1 = Ble.instance;
     ble1.onScanResults(callbackLast: (event) {
-      String name = event.advertisementData.advName.trim().toUpperCase();
-
+      /// 搜索到设备后去除前后空格
+      /// 如果设备名称包含 "Seism"，则停止扫描并连接设备
+      /// UUID 只需提供可唯一识别的部分即可，无需填写完整字符串。
+      /// Trim leading and trailing spaces after a device is discovered.
+      /// If the device name contains "Seism", stop scanning and connect to the device.
+      /// The UUID only needs to include a unique, non-repeating portion; the full string is not required.
+      String name = event.advertisementData.advName.trim();
       String cowName = "Seism";
-
       if (name != '' && name.contains(cowName)) {
         ble1.stopScan();
         ble1.connect(
           event.device,
           serviceUUID: "0001",
-          readCharacteristicUUID: "0003",
-          writeCharacteristicUUID: "0002",
+          readCharacteristicUUID: "0002",
+          writeCharacteristicUUID: "0003",
         );
       }
     });
@@ -192,36 +196,45 @@ class _MeasureCowState extends State<MeasureCow> {
       if (event is List<int>) {
         List<int> data = event;
         // 至少需要3字节：1字节类型 + 2字节计数器
+        /// At least 3 bytes are required: 1 byte for the type + 2 bytes for the counter.
         if (data.length < 3) return;
 
         /// ----------------------
         /// 1️⃣ 解析包头信息
+        /// 1️⃣ Parse the packet header.
         /// ----------------------
 
-        // 数据包类型（1=ACC，2=PPG）
+        /// 数据包类型（1=ACC，2=PPG）
+        /// Packet type (1 = ACC, 2 = PPG)
         final packetType = data[0];
 
         // 包计数器（2字节，小端序）
+        // Packet counter (2 bytes, little-endian)
         // Python: packet_counter = int.from_bytes(data[1:3], 'little')
         int packetCounter = data[1] | (data[2] << 8);
 
         // 每个样本3字节，剩余字节数除以3得到样本数量
+        // Each sample is 3 bytes long. Divide the remaining bytes by 3 to obtain the number of samples.
         // Python: n_samples = (len(data) - 3) // 3
         final nSamples = (data.length - 3) ~/ 3;
         if (nSamples == 0) return;
 
         /// ----------------------
         /// 2️⃣ 时间戳初始化
+        /// 2️⃣ Initialize timestamps.
         /// ----------------------
 
         // 当前系统时间（毫秒）
+        // Current system time (milliseconds)
         final now = DateTime.now().millisecondsSinceEpoch;
 
         /// ----------------------
         /// 3️⃣ 样本数据解析循环
+        /// 3️⃣ Loop through sample data.
         /// ----------------------
         for (int i = 0; i < nSamples; i++) {
           // 每个样本3字节：低字节在前（小端序）
+          // Each sample is 3 bytes long: least significant byte first (little-endian)
           final start = 3 + i * 3;
           final end = start + 3;
           final sampleBytes = data.sublist(start, end);
@@ -230,15 +243,18 @@ class _MeasureCowState extends State<MeasureCow> {
 
           /// ----------------------
           /// 4️⃣ 时间戳计算
+          /// 4️⃣ Calculate timestamps.
           /// ----------------------
 
           double ts = 0;
 
           if (packetType == PACKET_TYPE_ACC) {
             // 加速度包：基于采样周期计算时间
+            /// Acceleration packet: Calculate time based on sampling period.
             ts = now + 5 * i * 1.0;
 
             // 放入折线图中
+            // Put into the line chart
             switch (i) {
               case 0:
                 xSpots.add(FlSpot(ts, value.toDouble()));
@@ -260,20 +276,24 @@ class _MeasureCowState extends State<MeasureCow> {
               default:
             }
             // 保存进入数组
+            // Save into an array
             saveAcc.add("$now,$packetCounter,$value");
           } else if (packetType == PACKET_TYPE_PPG) {
             // 光电容积包（PPG）
+            // Photoplethysmography (PPG) packet
             ts = now + i * 1.0;
             ppgSpots.add(FlSpot(ts, value.toDouble()));
             // 保存进入数组
+            // Save into an array
             savePpg.add("$now,$packetCounter,$value");
           }
         }
 
         setState(() {});
 
+        // 让折线图显示最新的数据
+        // Make the line chart display the latest data
         if (ppgSpots.length > (2 * 1000 / PPG_SAMPLE_PERIOD_MS)) {
-          // 一下移除nSamples个元素
           ppgSpots.removeRange(0, nSamples);
         }
         if (xSpots.length > 3 * (1000 / ACC_SAMPLE_PERIOD_MS)) {
@@ -283,6 +303,7 @@ class _MeasureCowState extends State<MeasureCow> {
         }
 
         // 5秒钟保存一次数据
+        // Save data every 5 seconds
         int ppgLength = 5 * (1000 / PPG_SAMPLE_PERIOD_MS).toInt();
         if (savePpg.length > ppgLength) {
           String str = savePpg.join("\n");
@@ -300,6 +321,8 @@ class _MeasureCowState extends State<MeasureCow> {
     });
   }
 
+  // 保存数据到文件
+  // Save data to file
   sendDataFun(String data, File? file) async {
     if (file != null) {
       try {
